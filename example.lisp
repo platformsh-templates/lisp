@@ -9,8 +9,13 @@
 
 (export 'main)
 (defun main ()
-  (let ((acceptor (make-instance
-                   'easy-acceptor
-                   :port (parse-integer (uiop:getenv "PORT")))))
+  (let* ((port (parse-integer (uiop:getenv "PORT")))
+         (acceptor (make-instance
+                    'easy-acceptor
+                    :port port)))
     (start acceptor)
-    (sleep most-positive-fixnum)))
+    (bt:join-thread
+     (find (format nil "hunchentoot-listener-*:~A" port)
+           (bt:all-threads)
+           :key #'bt:thread-name
+           :test #'string=))))
